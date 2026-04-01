@@ -740,6 +740,12 @@ mod mewnala {
     }
 
     #[pyfunction]
+    #[pyo3(pass_module)]
+    fn mode_2d(module: &Bound<'_, PyModule>) -> PyResult<()> {
+        graphics!(module).mode_2d()
+    }
+
+    #[pyfunction]
     #[pyo3(pass_module, signature = (*args))]
     fn camera_position(module: &Bound<'_, PyModule>, args: &Bound<'_, PyTuple>) -> PyResult<()> {
         graphics!(module).camera_position(args)
@@ -749,6 +755,66 @@ mod mewnala {
     #[pyo3(pass_module, signature = (*args))]
     fn camera_look_at(module: &Bound<'_, PyModule>, args: &Bound<'_, PyTuple>) -> PyResult<()> {
         graphics!(module).camera_look_at(args)
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn orbit_camera(module: &Bound<'_, PyModule>) -> PyResult<()> {
+        graphics!(module).orbit_camera()
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn free_camera(module: &Bound<'_, PyModule>) -> PyResult<()> {
+        graphics!(module).free_camera()
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn pan_camera(module: &Bound<'_, PyModule>) -> PyResult<()> {
+        graphics!(module).pan_camera()
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn disable_camera(module: &Bound<'_, PyModule>) -> PyResult<()> {
+        graphics!(module).disable_camera()
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn camera_distance(module: &Bound<'_, PyModule>, distance: f32) -> PyResult<()> {
+        graphics!(module).camera_distance(distance)
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module, signature = (*args))]
+    fn camera_center(module: &Bound<'_, PyModule>, args: &Bound<'_, PyTuple>) -> PyResult<()> {
+        graphics!(module).camera_center(args)
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn camera_min_distance(module: &Bound<'_, PyModule>, min: f32) -> PyResult<()> {
+        graphics!(module).camera_min_distance(min)
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn camera_max_distance(module: &Bound<'_, PyModule>, max: f32) -> PyResult<()> {
+        graphics!(module).camera_max_distance(max)
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn camera_speed(module: &Bound<'_, PyModule>, speed: f32) -> PyResult<()> {
+        graphics!(module).camera_speed(speed)
+    }
+
+    #[pyfunction]
+    #[pyo3(pass_module)]
+    fn camera_reset(module: &Bound<'_, PyModule>) -> PyResult<()> {
+        graphics!(module).camera_reset()
     }
 
     #[pyfunction]
