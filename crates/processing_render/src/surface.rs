@@ -368,7 +368,9 @@ pub fn resize(
         let scale = window.resolution.scale_factor();
         let physical_w = (width as f32 * scale) as u32;
         let physical_h = (height as f32 * scale) as u32;
-        window.resolution.set_physical_resolution(physical_w, physical_h);
+        window
+            .resolution
+            .set_physical_resolution(physical_w, physical_h);
         Ok(())
     } else {
         Err(error::ProcessingError::SurfaceNotFound)
@@ -383,10 +385,9 @@ pub fn set_pixel_density(
         let logical_w = window.resolution.width();
         let logical_h = window.resolution.height();
         window.resolution.set_scale_factor_override(Some(density));
-        window.resolution.set_physical_resolution(
-            (logical_w * density) as u32,
-            (logical_h * density) as u32,
-        );
+        window
+            .resolution
+            .set_physical_resolution((logical_w * density) as u32, (logical_h * density) as u32);
         Ok(())
     } else {
         Err(error::ProcessingError::SurfaceNotFound)

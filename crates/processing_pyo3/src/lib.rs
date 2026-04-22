@@ -49,7 +49,6 @@ thread_local! {
     static LAST_GLOBALS: RefCell<HashMap<&'static str, Py<PyAny>>> = RefCell::new(HashMap::new());
 }
 
-
 /// Writes a new value to globals, iff the new value does not match a previous tracked value.
 pub(crate) fn set_tracked<'py, V>(
     globals: &Bound<'py, PyAny>,
