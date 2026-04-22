@@ -5,20 +5,20 @@ export PROCESSING_ASSET_ROOT := canonicalize("./assets")
 default:
     @just --list
 
-py-build:
-    cd crates/processing_pyo3; uv run maturin develop --release
+py-build *args:
+    cd crates/processing_pyo3; uv run maturin develop --release {{args}}
 
 py-stubs: py-build
     cargo run --release -p generate_stubs
 
-py-run file: py-build
+py-run file *args: (py-build args)
     cd crates/processing_pyo3; uv run python ./examples/{{file}}
 
 py-jupyter file: py-build
     cd crates/processing_pyo3; uv run jupyter notebook ./examples/{{file}}
 
 py-ipython: py-build
-    cd crates/processing_pyo3; ipython
+    cd crates/processing_pyo3; uv run ipython
 
 docs-serve: py-stubs
     uv run --project crates/processing_pyo3 --group docs mkdocs serve
