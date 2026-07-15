@@ -7,13 +7,39 @@ from mewnala import *
 from math import cos, sin
 from random import uniform
 
-BOID_COUNT = 10000
+BOID_COUNT = 30000
 BOUND = 30.0  # half-extent of the wrapping box
 NEIGHBOR_DIST = 5.0
 SEPARATION_DIST = 2.5
 MAX_SPEED = 10.0  # units per second
 MAX_FORCE = 6.0  # units per second²
 DT = 1.0 / 60.0
+
+ZOOM = 0.01  # camera distance multiplier per wheel notch
+ZOOM_MIN = 0.3  # closest: inside the flock
+ZOOM_MAX = 4.0  # farthest: whole box in frame
+
+# Each boid picks a fixed color from this palette by particle index, so
+# the flock shows a stable, evenly-distributed mix of hues.
+PALETTE = [
+    "#f2eb8a",
+    "#fed000",
+    "#fc8405",
+    "#ed361a",
+    "#4464a1",
+    "#f398c3",
+    "#cf3895",
+    "#6d358a",
+    "#06b4b0",
+    "#4b8a5f",
+]
+
+BACKGROUND_COLOR = "#1F1F3A"
+
+def _hex_to_rgb(hex_color):
+    hex_color = hex_color.lstrip("#")
+    return tuple(int(hex_color[i : i + 2], 16) / 255.0 for i in (0, 2, 4))
+
 
 # Pass 1: every boid reads the whole flock's state and writes only its
 # steering force. Splitting the read from the write mirrors the CPU
@@ -158,6 +184,7 @@ flock_pass = None
 integrate_pass = None
 title_last_time = 0.0
 title_last_frame = 0
+zoom_level = 1.0
 
 
 # Two triangles folded slightly along the nose-tail spine, like a paper
@@ -188,8 +215,6 @@ def setup():
     window_title(f"GPU Flocking — {BOID_COUNT:,} boids")
     mode_3d()
 
-    directional_light((0.95, 0.9, 0.85), 800.0)
-
     velocity_attr = Attribute("velocity", AttributeFormat.Float3)
     steer_attr = Attribute("steer", AttributeFormat.Float3)
 
@@ -204,16 +229,18 @@ def setup():
         ],
     )
 
+    palette_rgb = [_hex_to_rgb(c) for c in PALETTE]
+
     positions = []
     velocities = []
     rotations = []
     colors = []
-    for _ in range(BOID_COUNT):
+    for i in range(BOID_COUNT):
         positions.append([uniform(-BOUND, BOUND) for _ in range(3)])
         velocities.append([uniform(-1.0, 1.0) * MAX_SPEED * 0.4 for _ in range(3)])
         rotations.append([0.0, 0.0, 0.0, 1.0])
-        c = hsva(uniform(190.0, 280.0), 0.7, 1.0)
-        colors.append([c.r, c.g, c.b, 1.0])
+        r, g, b = palette_rgb[i % len(palette_rgb)]
+        colors.append([r, g, b, 1.0])
 
     p.buffer(Attribute.position()).write(positions)
     p.buffer(Attribute.rotation()).write(rotations)
@@ -222,14 +249,14 @@ def setup():
     color_buf.write(colors)
 
     boid = boid_geometry(0.4, 1.3, 0.15)
-    mat = Material.pbr(albedo=color_buf)
+    mat = Material.unlit(albedo=color_buf)
 
     flock_pass = Compute(Shader(FLOCK_SHADER))
     integrate_pass = Compute(Shader(INTEGRATE_SHADER))
 
 
 def draw():
-    global title_last_time, title_last_frame
+    global title_last_time, title_last_frame, zoom_level
 
     title_elapsed = elapsed_time - title_last_time
     if title_elapsed >= 0.5:
@@ -238,11 +265,13 @@ def draw():
         title_last_time = elapsed_time
         title_last_frame = frame_count
 
+    zoom_level = max(ZOOM_MIN, min(ZOOM_MAX, zoom_level - mouse_wheel * ZOOM))
+
     t = elapsed_time * 0.1
-    r = BOUND * 2.6
+    r = BOUND * 2.6 * zoom_level
     camera_position(cos(t) * r, BOUND * 0.8, sin(t) * r)
     camera_look_at(0.0, 0.0, 0.0)
-    background(10, 12, 18)
+    background(BACKGROUND_COLOR)
 
     use_material(mat)
     particles(p, boid)
